@@ -7,26 +7,21 @@ NTSTATUS OakDriverDeviceControl(PDEVICE_OBJECT, PIRP);
 extern "C" NTSTATUS DriverEntry(PDRIVER_OBJECT DriverObject, PUNICODE_STRING RegistryPath) {
 
 	//UNREFERENCED_PARAMETER(DriverObject);
-	//UNREFERENCED_PARAMETER(RegistryPath);
+	UNREFERENCED_PARAMETER(RegistryPath);
 
 	KdPrint(("OakDriver: DriverEntry\n"));
-	KdPrint(("Registry Path: %wZ\n", RegistryPath));
 
 	DriverObject->DriverUnload = OakDriverUnload;
 
-	RTL_OSVERSIONINFOW vi = { sizeof(vi) };
-	NTSTATUS status = RtlGetVersion(&vi);
-	if (!NT_SUCCESS(status)) {
-		KdPrint(("Error: Faild in RtlGetVersion (0x%X)", status));
-
-		return status;
-	}
+	NTSTATUS status;
 
 
 	DriverObject->MajorFunction[IRP_MJ_CREATE] = OakDriverCreateClose;
 	DriverObject->MajorFunction[IRP_MJ_CLOSE] = OakDriverCreateClose;
 	DriverObject->MajorFunction[IRP_MJ_DEVICE_CONTROL] = OakDriverDeviceControl;
 
+
+	// Create Device
 
 	UNICODE_STRING devName;
 	RtlInitUnicodeString(&devName, L"\\Device\\OakSecurity");
@@ -45,6 +40,9 @@ extern "C" NTSTATUS DriverEntry(PDRIVER_OBJECT DriverObject, PUNICODE_STRING Reg
 		return status;
 	}
 
+
+	
+	//Create Symbolic link
 
 	UNICODE_STRING symLink = RTL_CONSTANT_STRING(L"\\??\\OakSecurity");
 	status = IoCreateSymbolicLink(&symLink, &devName);
@@ -70,3 +68,16 @@ void OakDriverUnload(PDRIVER_OBJECT DriverObject) {
 
 	IoDeleteDevice(DriverObject->DeviceObject);
 }
+
+
+NTSTATUS OakDriverCreateClose(PDEVICE_OBJECT DeviceObject, PIRP Irp) {
+	UNREFERENCED_PARAMETER(DeviceObject);
+
+	Irp->IoStatus.Status = STATUS_SUCCESS;
+	Irp->IoStatus.Information = 0;
+
+	IoCompleteRequest(Irp, 0);
+
+	return STATUS_SUCCESS;
+}
+
