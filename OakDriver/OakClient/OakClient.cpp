@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include "..\OakDriver\OakDriverCommon.h"
 
+
 int main()
 {
 
@@ -11,12 +12,14 @@ int main()
         return 1;
     }
 
+    printf("Current Process Id : (%u)", GetCurrentProcessId);
+
     OAKSECURITY_PROCESSID_INPUT input;
     input.ProcessId = GetCurrentProcessId();
 
     DWORD returned_bytes = 0;
 
-    if (!DeviceIoControl(hDevice, 1, &input, sizeof input, nullptr, 0, &returned_bytes, nullptr)) {
+    if (!DeviceIoControl(hDevice, IOCTL_PROTECT_PROCESS, &input, sizeof input, nullptr, 0, &returned_bytes, nullptr)) {
         printf("Error in DeviceIoControl (%u)", GetLastError());
         CloseHandle(hDevice);
         return 1;

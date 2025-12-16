@@ -108,6 +108,9 @@
   <ItemGroup>
     <ClCompile Include="OakDriver.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="OakDriverCommon.h" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

@@ -1,6 +1,12 @@
 #pragma once
-#include <Windows.h>
+
+
+#define IOCTL_PROTECT_PROCESS CTL_CODE(FILE_DEVICE_UNKNOWN, 0x1337, METHOD_BUFFERED, FILE_WRITE_DATA)
+
+
 
 struct OAKSECURITY_PROCESSID_INPUT {
 	ULONG ProcessId;
 };
+
+
