@@ -1,5 +1,6 @@
 #include <Windows.h>
 #include <stdio.h>
+#include "..\OakDriver\OakDriverCommon.h"
 
 int main()
 {
@@ -9,6 +10,19 @@ int main()
         printf("Error Opening Device (%u)", GetLastError());
         return 1;
     }
+
+    OAKSECURITY_PROCESSID_INPUT input;
+    input.ProcessId = GetCurrentProcessId();
+
+    DWORD returned_bytes = 0;
+
+    if (!DeviceIoControl(hDevice, 1, &input, sizeof input, nullptr, 0, &returned_bytes, nullptr)) {
+        printf("Error in DeviceIoControl (%u)", GetLastError());
+        CloseHandle(hDevice);
+        return 1;
+    }
+
+    printf("Success Securing.");
 
     CloseHandle(hDevice);
     
