@@ -12,10 +12,10 @@ int main()
         return 1;
     }
 
-    printf("Current Process Id : (%u)", GetCurrentProcessId);
+    printf("Current Process Id : (%u)", 25);
 
     OAKSECURITY_PROCESSID_INPUT input;
-    input.ProcessId = GetCurrentProcessId();
+    input.ProcessId = 25;
 
     DWORD returned_bytes = 0;
 

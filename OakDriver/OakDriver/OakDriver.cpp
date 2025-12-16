@@ -97,10 +97,10 @@ NTSTATUS OakDriverDeviceControl(PDEVICE_OBJECT DeviceObject, PIRP Irp) {
 				break;
 			}
 
-			auto ProcessId = (OAKSECURITY_PROCESSID_INPUT*)Irp->AssociatedIrp.SystemBuffer;
+			auto input = (OAKSECURITY_PROCESSID_INPUT*)Irp->AssociatedIrp.SystemBuffer;
 
 
-			DbgPrint("Your input Process id is : (%u)", ProcessId);
+			DbgPrint("Your input Process id is : (%u)", input->ProcessId);
 
 
 			status = STATUS_SUCCESS;
