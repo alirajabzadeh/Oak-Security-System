@@ -16,13 +16,13 @@ extern "C" NTSTATUS DriverEntry(PDRIVER_OBJECT DriverObject, PUNICODE_STRING Reg
 	NTSTATUS status;
 
 
+	//Dispatch Routine Defenition
 	DriverObject->MajorFunction[IRP_MJ_CREATE] = OakDriverCreateClose;
 	DriverObject->MajorFunction[IRP_MJ_CLOSE] = OakDriverCreateClose;
 	DriverObject->MajorFunction[IRP_MJ_DEVICE_CONTROL] = OakDriverDeviceControl;
 
 
 	// Create Device
-
 	UNICODE_STRING devName;
 	RtlInitUnicodeString(&devName, L"\\Device\\OakSecurity");
 	PDEVICE_OBJECT DeviceObject;
@@ -43,7 +43,6 @@ extern "C" NTSTATUS DriverEntry(PDRIVER_OBJECT DriverObject, PUNICODE_STRING Reg
 
 	
 	//Create Symbolic link
-
 	UNICODE_STRING symLink = RTL_CONSTANT_STRING(L"\\??\\OakSecurity");
 	status = IoCreateSymbolicLink(&symLink, &devName);
 	if (!NT_SUCCESS(status)) {
@@ -79,5 +78,11 @@ NTSTATUS OakDriverCreateClose(PDEVICE_OBJECT DeviceObject, PIRP Irp) {
 	IoCompleteRequest(Irp, 0);
 
 	return STATUS_SUCCESS;
+}
+
+NTSTATUS OakDriverDeviceControl(PDEVICE_OBJECT DeviceObject, PIRP Irp) {
+
+
+
 }
 
