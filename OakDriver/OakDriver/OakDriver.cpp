@@ -4,6 +4,8 @@
 void OakDriverUnload(PDRIVER_OBJECT);
 NTSTATUS OakDriverCreateClose(PDEVICE_OBJECT, PIRP);
 NTSTATUS OakDriverDeviceControl(PDEVICE_OBJECT, PIRP);
+void CreateProcessNotifyRoutine(PEPROCESS, HANDLE, PPS_CREATE_NOTIFY_INFO);
+
 
 extern "C" NTSTATUS DriverEntry(PDRIVER_OBJECT DriverObject, PUNICODE_STRING RegistryPath) {
 
@@ -52,6 +54,14 @@ extern "C" NTSTATUS DriverEntry(PDRIVER_OBJECT DriverObject, PUNICODE_STRING Reg
 		return status;
 	}
 
+	status = PsSetCreateProcessNotifyRoutineEx(CreateProcessNotifyRoutine, FALSE);
+	if (!NT_SUCCESS(status)) {
+		IoDeleteDevice(DeviceObject);
+		KdPrint(("Faild in PsSetCreateProcessNotifyRoutineEx (0x%X)\n", status));
+		return status;
+
+	}
+
 
 	return STATUS_SUCCESS;
 }
@@ -63,6 +73,9 @@ void OakDriverUnload(PDRIVER_OBJECT DriverObject) {
 	//UNREFERENCED_PARAMETER(DriverObject);
 
 	KdPrint(("OakDriver: Unload\n"));
+
+	PsSetCreateProcessNotifyRoutineEx(CreateProcessNotifyRoutine, TRUE);
+
 	UNICODE_STRING symLink = RTL_CONSTANT_STRING(L"\\??\\OakSecurity");
 	IoDeleteSymbolicLink(&symLink);
 
@@ -90,7 +103,9 @@ NTSTATUS OakDriverDeviceControl(PDEVICE_OBJECT DeviceObject, PIRP Irp) {
 
 	NTSTATUS status = STATUS_INVALID_DEVICE_REQUEST;
 	switch (stack->Parameters.DeviceIoControl.IoControlCode) {
+		
 		case IOCTL_PROTECT_PROCESS: {
+			
 			if (input_buffer_length != sizeof OAKSECURITY_PROCESSID_INPUT) {
 				KdPrint(("INVALID PARAMETER"));
 				status = STATUS_INVALID_PARAMETER;
@@ -116,5 +131,25 @@ NTSTATUS OakDriverDeviceControl(PDEVICE_OBJECT DeviceObject, PIRP Irp) {
 
 	return status;
 
+}
+
+
+void CreateProcessNotifyRoutine(PEPROCESS Process, HANDLE Pid, PPS_CREATE_NOTIFY_INFO CreateInfo){
+
+	UNREFERENCED_PARAMETER(Process);
+	UNREFERENCED_PARAMETER(Pid);
+
+
+	if (CreateInfo != NULL) {
+
+		if (wcsstr(CreateInfo->CommandLine->Buffer, L"notepad") != NULL) {
+			DbgPrint("Process (%ws) is lunched \n", CreateInfo->CommandLine->Buffer);
+
+			CreateInfo->CreationStatus = STATUS_ACCESS_DENIED;
+		}
+	}
+	else {
+		DbgPrint("Process Exited");
+	}
 }
 
