@@ -1,10 +1,10 @@
 #include <ntddk.h>
 #include "OakDriverCommon.h"
+#include "DriverIOCTLHandler.h"
+#include "ProcessNotificationHandler.h"
 
 void OakDriverUnload(PDRIVER_OBJECT);
-NTSTATUS OakDriverCreateClose(PDEVICE_OBJECT, PIRP);
-NTSTATUS OakDriverDeviceControl(PDEVICE_OBJECT, PIRP);
-void CreateProcessNotifyRoutine(PEPROCESS, HANDLE, PPS_CREATE_NOTIFY_INFO);
+
 
 
 extern "C" NTSTATUS DriverEntry(PDRIVER_OBJECT DriverObject, PUNICODE_STRING RegistryPath) {
@@ -66,8 +66,6 @@ extern "C" NTSTATUS DriverEntry(PDRIVER_OBJECT DriverObject, PUNICODE_STRING Reg
 	return STATUS_SUCCESS;
 }
 
-
-
 void OakDriverUnload(PDRIVER_OBJECT DriverObject) {
 
 	//UNREFERENCED_PARAMETER(DriverObject);
@@ -83,73 +81,4 @@ void OakDriverUnload(PDRIVER_OBJECT DriverObject) {
 }
 
 
-NTSTATUS OakDriverCreateClose(PDEVICE_OBJECT DeviceObject, PIRP Irp) {
-	UNREFERENCED_PARAMETER(DeviceObject);
-
-	Irp->IoStatus.Status = STATUS_SUCCESS;
-	Irp->IoStatus.Information = 0;
-
-	IoCompleteRequest(Irp, 0);
-
-	return STATUS_SUCCESS;
-}
-
-NTSTATUS OakDriverDeviceControl(PDEVICE_OBJECT DeviceObject, PIRP Irp) {
-
-	UNREFERENCED_PARAMETER(DeviceObject);
-
-	PIO_STACK_LOCATION stack = IoGetCurrentIrpStackLocation(Irp);
-	size_t input_buffer_length = stack->Parameters.DeviceIoControl.InputBufferLength;
-
-	NTSTATUS status = STATUS_INVALID_DEVICE_REQUEST;
-	switch (stack->Parameters.DeviceIoControl.IoControlCode) {
-		
-		case IOCTL_PROTECT_PROCESS: {
-			
-			if (input_buffer_length != sizeof OAKSECURITY_PROCESSID_INPUT) {
-				KdPrint(("INVALID PARAMETER"));
-				status = STATUS_INVALID_PARAMETER;
-				break;
-			}
-
-			auto input = (OAKSECURITY_PROCESSID_INPUT*)Irp->AssociatedIrp.SystemBuffer;
-
-
-			DbgPrint("Your input Process id is : (%u)", input->ProcessId);
-
-
-			status = STATUS_SUCCESS;
-			break;
-
-		}
-	}
-
-
-	Irp->IoStatus.Status = status;
-	Irp->IoStatus.Information = 0;
-	IoCompleteRequest(Irp, 0);
-
-	return status;
-
-}
-
-
-void CreateProcessNotifyRoutine(PEPROCESS Process, HANDLE Pid, PPS_CREATE_NOTIFY_INFO CreateInfo){
-
-	UNREFERENCED_PARAMETER(Process);
-	UNREFERENCED_PARAMETER(Pid);
-
-
-	if (CreateInfo != NULL) {
-
-		if (wcsstr(CreateInfo->CommandLine->Buffer, L"notepad") != NULL) {
-			DbgPrint("Process (%ws) is lunched \n", CreateInfo->CommandLine->Buffer);
-
-			CreateInfo->CreationStatus = STATUS_ACCESS_DENIED;
-		}
-	}
-	else {
-		DbgPrint("Process Exited");
-	}
-}
 

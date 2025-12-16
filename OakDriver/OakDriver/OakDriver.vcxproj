@@ -142,10 +142,14 @@
     <FilesToPackage Include="$(TargetPath)" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="DriverIOCTLHandler.cpp" />
     <ClCompile Include="OakDriver.cpp" />
+    <ClCompile Include="ProcessNotificationHandler.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="DriverIOCTLHandler.h" />
     <ClInclude Include="OakDriverCommon.h" />
+    <ClInclude Include="ProcessNotificationHandler.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
