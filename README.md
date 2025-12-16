@@ -1,4 +1,4 @@
-# 🌳 Oak-Security-System
+# 🌳 Oak Security System
 Oak Security System , The Endpoint Cyber Security Solution .
 
 This project is an advanced endpoint protection system designed to detect, prevent, and mitigate modern malware behaviors such as ransomware attacks, unauthorized screenshots, cookie theft, and credential exfiltration and etc.
